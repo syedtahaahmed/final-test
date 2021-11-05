@@ -1,17 +1,32 @@
+const { json } = require('body-parser');
 var request = require('request');
+var token=require('../index.js').token
+const { ConversationListFilter } = require('sunshine-conversations-client');
 
-const check_ZOHO_FOR_CONVERSATION_ID = (appId, displayName, conversationId, fn) => {
+const check_ZOHO_FOR_CONVERSATION_ID = (accesstoken,appId, displayName, conversationId, fn) => {
 
     request({
         method: "GET",
         url: "https://www.zohoapis.in/crm/v2/Leads?fields=id,conversationid,when_going_to_buy,Mobile,state1,district1,Designation,Lead_Status",
         headers: {
-            "Authorization": "Zoho-oauthtoken 1000.2d9607890a7abcf9969e297f3df5b600.92119edd856232771206951e081bb24c"
+            "Authorization": "Zoho-oauthtoken "+accesstoken
         },
 
 
         //json: true,   // <--Very important!!!
     }, function(error, response, body) {
+        
+ var error1= (JSON.parse( response.body)).code
+
+
+        if(error1==="INVALID_TOKEN"){
+            fn(-1,undefined,undefined,undefined,undefined,undefined,undefined)
+        }
+        else if(error){
+            fn((-2,undefined,undefined,undefined,undefined,undefined,undefined) ) 
+        }
+        else{ 
+
         let flag = 0
         var dat = (JSON.parse(body)).data
         var l = (dat.length)
@@ -30,9 +45,11 @@ const check_ZOHO_FOR_CONVERSATION_ID = (appId, displayName, conversationId, fn) 
             fn(flag, 0, 0, 0, 0, 0, 0)
 
         }
+    }
 
         //console.log((JSON.parse(body)).data[1])
     });
+
 
 
 }
